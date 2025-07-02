@@ -119,8 +119,9 @@ if menu == "Main":
     if input_method == "Upload CSV":
         uploaded_file = st.file_uploader("Upload a CSV file with an 'email' column", type="csv")
         if uploaded_file:
-            df = pd.read_csv(uploaded_file, usecols=[0], names=["email"], skiprows=1)
-            if 'email' not in df.columns:
+    df = pd.read_csv(uploaded_file)      
+    original_df = df.copy()             
+    if 'email' not in df.columns:
                 st.error("CSV must have a column named 'email'.")
             else:
                 emails = df['email'].dropna().astype(str).str.replace(';', '', regex=False).str.strip().tolist()
@@ -154,7 +155,12 @@ if menu == "Main":
                 time.sleep(1)
 
             st.success("✅ Done!")
-            final_df = pd.DataFrame(checked_results)
+            results_df = pd.DataFrame(checked_results)              
+final_df = pd.concat([                                   
+    original_df.reset_index(drop=True),
+    results_df[['validation_status', 'validation_analysis']]
+], axis=1)
+final_df['validation_status'] = final_df['validation_status'].apply(status_icon)
             final_df['validation_status'] = final_df['validation_status'].apply(status_icon)
             st.dataframe(final_df)
 
