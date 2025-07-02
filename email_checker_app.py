@@ -172,12 +172,17 @@ final_df = pd.concat([
     original_df.reset_index(drop=True),
     results_df[['validation_status', 'validation_analysis']]
 ], axis=1)
-final_df['validation_status'] = final_df['validation_status'].apply(status_icon)
-            final_df['validation_status'] = final_df['validation_status'].apply(status_icon)
-            st.dataframe(final_df)
 
-            csv = final_df.to_csv(index=False).encode('utf-8')
-            st.download_button("📥 Download Results CSV", data=csv, file_name='checked_emails.csv', mime='text/csv')
+        final_df['validation_status'] = final_df['validation_status'].apply(status_icon)
+        st.dataframe(final_df)
+
+        csv = final_df.to_csv(index=False).encode('utf-8')
+        st.download_button(
+            "📥 Download Results CSV",
+            data=csv,
+            file_name="checked_emails.csv",
+            mime="text/csv"
+        )
 
 elif menu == "How it works":
     st.subheader("📘 How This App Works")
