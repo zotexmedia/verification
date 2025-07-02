@@ -167,13 +167,18 @@ if input_method == "Upload CSV":
                 time.sleep(1)
 
             st.success("✅ Done!")
-            results_df = pd.DataFrame(checked_results)              
-final_df = pd.concat([                                   
-    original_df.reset_index(drop=True),
-    results_df[['validation_status', 'validation_analysis']]
-], axis=1)
+            results_df = pd.DataFrame(checked_results)
 
+        final_df = pd.concat(
+            [
+                original_df.reset_index(drop=True),
+                results_df[['validation_status', 'validation_analysis']]
+            ],
+            axis=1
+        )
         final_df['validation_status'] = final_df['validation_status'].apply(status_icon)
+
+        # ---- show table & download button ----
         st.dataframe(final_df)
 
         csv = final_df.to_csv(index=False).encode('utf-8')
