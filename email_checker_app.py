@@ -116,16 +116,28 @@ if menu == "Main":
     input_method = st.radio("Choose input method:", ["Upload CSV", "Paste Emails"])
     emails = []
 
-    if input_method == "Upload CSV":
-        uploaded_file = st.file_uploader("Upload a CSV file with an 'email' column", type="csv")
-        if uploaded_file:
-    df = pd.read_csv(uploaded_file)      
-    original_df = df.copy()             
-    if 'email' not in df.columns:
-                st.error("CSV must have a column named 'email'.")
-            else:
-                emails = df['email'].dropna().astype(str).str.replace(';', '', regex=False).str.strip().tolist()
+if input_method == "Upload CSV":
+    uploaded_file = st.file_uploader(
+        "Upload a CSV file with an 'email' column", type="csv"
+    )
 
+    if uploaded_file:
+        df = pd.read_csv(uploaded_file)        # read every column
+        original_df = df.copy()                # preserve a copy
+
+        if 'email' not in df.columns:
+            st.error("CSV must have a column named 'email'.")
+            st.stop()                          # stop the app here
+        else:
+            emails = (
+                df['email']
+                  .dropna()
+                  .astype(str)
+                  .str.replace(';', '', regex=False)
+                  .str.strip()
+                  .tolist()
+            )
+            
     elif input_method == "Paste Emails":
         pasted = st.text_area("Paste email addresses (one per line)")
         if pasted.strip():
