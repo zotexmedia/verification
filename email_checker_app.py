@@ -58,7 +58,6 @@ def check_email(email):
     email = email.strip().replace(';', '')
     result = {"email": email, "validation_status": "", "validation_analysis": ""}
 
-    # basic syntax
     try:
         valid = validate_email(email, check_deliverability=False)
         domain = valid["domain"].lower()
@@ -66,7 +65,6 @@ def check_email(email):
         result.update(validation_status="Do Not Send", validation_analysis="Invalid Syntax")
         return result
 
-    # deliverability rules
     if not has_mx_record(domain):
         result.update(validation_status="Do Not Send", validation_analysis="No MX")
     elif domain in DISPOSABLE_DOMAINS:
@@ -102,14 +100,13 @@ if menu == "Main":
             if "email" not in df.columns:
                 st.error("CSV must have a column named 'email'.")
                 st.stop()
-            original_df = df.copy()                       # preserve ALL columns
+            original_df = df.copy()                       # keep ALL columns intact
             emails = (
                 df["email"]
-                .dropna()
-                .astype(str)
-                .str.replace(";", "", regex=False)
-                .str.strip()
-                .tolist()
+                  .astype(str)
+                  .str.replace(";", "", regex=False)
+                  .str.strip()
+                  .tolist()
             )
     else:  # Paste Emails
         pasted = st.text_area("Paste e-mails (one per line)")
@@ -129,7 +126,9 @@ if menu == "Main":
             # show live table with “Checking…” row
             live_df = pd.DataFrame(
                 checked_results
-                + [{"email": email, "validation_status": "Checking...", "validation_analysis": ""}]
+                + [{"email": email,
+                    "validation_status": "Checking...",
+                    "validation_analysis": ""}]
             )
             live_df["validation_status"] = live_df["validation_status"].apply(status_icon)
             status_placeholder.dataframe(live_df)
@@ -139,12 +138,12 @@ if menu == "Main":
 
         st.success("✅ Done!")
 
-        results_df = pd.DataFrame(checked_results)
+        results_df = pd.DataFrame(checked_results).set_index("email")
 
         # --------- ADD COLUMNS WITHOUT DROPPING ANYTHING ----------
         final_df = original_df.copy()
-        final_df["validation_status"]   = results_df["validation_status"].values
-        final_df["validation_analysis"] = results_df["validation_analysis"].values
+        final_df["validation_status"]   = final_df["email"].map(results_df["validation_status"])
+        final_df["validation_analysis"] = final_df["email"].map(results_df["validation_analysis"])
         final_df["validation_status"]   = final_df["validation_status"].apply(status_icon)
 
         st.dataframe(final_df)
